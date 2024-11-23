@@ -1,5 +1,6 @@
 // 2 dropdowns 1 model and another stocks. Based on what stock you pick, update the chart of prices.
 "use client";
+import { format, parseISO } from "date-fns";
 import { useState } from "react";
 import {
     DropdownMenu,
@@ -29,7 +30,7 @@ import {
 const chartConfig = {
     desktop: {
         label: "Desktop",
-        color: "hsl(var(--chart-1))",
+        color: "#c28b02",
     },
     mobile: {
         label: "Mobile",
@@ -53,10 +54,10 @@ const data = {
     ],
     timeSeriesData: {
         AAPL: [
-            { date: "1", price: 150 },
-            { date: "101", price: 152 },
-            { date: "2024", price: 148 },
-            { date: "2025", price: 153 },
+            { date: "2024-07-01", price: 150 },
+            { date: "2024-07-02", price: 152 },
+            { date: "2024-07-03", price: 148 },
+            { date: "2024-07-04", price: 153 },
         ],
         GOOGL: [
             { date: "2024-07-01", price: 2800 },
@@ -89,6 +90,29 @@ export default function Home() {
         }
         setSelectedStock(symbol);
     };
+    const calculateYAxisDomain = () => {
+        if (!selectedStock || data.timeSeriesData[selectedStock].length === 0) {
+            return ["auto", "auto"];
+        }
+        const prices = data.timeSeriesData[selectedStock].map(
+            (d: any) => d.price
+        );
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+        const range = maxPrice - minPrice;
+
+        // 5% buffer
+        const buffer = range * 0.05;
+
+        const bufferedMin = minPrice - buffer;
+        const bufferedMax = maxPrice + buffer;
+
+        const finalMin = bufferedMin < 0 ? 0 : bufferedMin;
+        const finalMax = bufferedMax;
+
+        return [finalMin, finalMax];
+    };
+
     return (
         <div className="flex flex-col">
             <div className="flex flex-row gap-3 justify-center py-6">
@@ -138,15 +162,7 @@ export default function Home() {
             </div>
             {selectedStock && (
                 <>
-                    {data.timeSeriesData[selectedStock].map(
-                        (entry: any, index: any) => (
-                            <div key={index} className="flex flex-row gap-3">
-                                <div className="">{entry.date}</div>
-                                <div className="">${entry.price}</div>
-                            </div>
-                        )
-                    )}
-                    <div className="w-[60%]">
+                    <div className="lg:px-64  sm:px-16 p-4">
                         <Card>
                             <CardHeader>
                                 <CardTitle>{selectedStock}</CardTitle>
@@ -161,6 +177,7 @@ export default function Home() {
                                         margin={{
                                             left: 12,
                                             right: 12,
+                                            bottom: 12,
                                         }}
                                     >
                                         <CartesianGrid vertical={false} />
@@ -170,8 +187,8 @@ export default function Home() {
                                             axisLine={false}
                                             tickMargin={8}
                                             tickFormatter={(value) =>
-                                                value.slice(0, 3)
-                                            }
+                                                format(parseISO(value), "MMM d")
+                                            } // "Jul 1"
                                         />
                                         <YAxis
                                             dataKey="price"
@@ -179,11 +196,14 @@ export default function Home() {
                                             axisLine={false}
                                             tickMargin={2}
                                             orientation="right"
-                                            domain={["dataMin", "dataMax"]}
-
-                                            // tickFormatter={(value) =>
-                                            //     value.slice(0, 3)
-                                            // }
+                                            domain={calculateYAxisDomain()}
+                                            tickFormatter={(value) =>
+                                                selectedStock === "GOOGL"
+                                                    ? `$${(
+                                                          value / 1000
+                                                      ).toFixed(1)}k`
+                                                    : `$${value}`
+                                            }
                                         />
                                         <ChartTooltip
                                             cursor={false}
@@ -198,14 +218,14 @@ export default function Home() {
                                                 y2="1"
                                             >
                                                 <stop
-                                                    offset="95%"
-                                                    stopColor="var(--color-desktop)"
-                                                    stopOpacity={0.8}
-                                                />
-                                                <stop
-                                                    offset="5%"
+                                                    offset="0%"
                                                     stopColor="var(--color-desktop)"
                                                     stopOpacity={0.1}
+                                                />
+                                                <stop
+                                                    offset="100%"
+                                                    stopColor="var(--color-desktop)"
+                                                    stopOpacity={0.05}
                                                 />
                                             </linearGradient>
                                         </defs>
@@ -213,8 +233,9 @@ export default function Home() {
                                             dataKey="price"
                                             type="natural"
                                             fill="url(#fillDesktop)"
-                                            fillOpacity={0.3}
+                                            fillOpacity={0.6}
                                             stroke="var(--color-desktop)"
+                                            strokeWidth={2}
                                             stackId="a"
                                         />
                                     </AreaChart>
