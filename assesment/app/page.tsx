@@ -116,7 +116,7 @@ export default function Home() {
                 <div className="flex px-1 py-1 rounded-xl border-[1px] border-color-white ">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost">
+                            <Button variant="ghost" className="">
                                 <div className="text-md font-semibold">
                                     {selectedModel || "Model"}
                                 </div>
