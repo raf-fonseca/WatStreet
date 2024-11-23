@@ -86,34 +86,17 @@ type StockSymbol = keyof typeof data.timeSeriesData; // StockSymbol is a type th
 export default function Home() {
     const [stockToggle, setStockToggle] = useState(false);
     const [selectedStock, setSelectedStock] = useState<StockSymbol | null>(
-        null
+        "AAPL"
     );
     const [modelToggle, setModelToggle] = useState(false);
+    const [selectedModel, setSelectedModel] = useState<string | null>(null); // State for selected model
 
     const handleStockSelect = (symbol: any) => {
         setSelectedStock(symbol);
     };
-    const calculateYAxisDomain = () => {
-        if (!selectedStock || data.timeSeriesData[selectedStock].length === 0) {
-            return ["auto", "auto"];
-        }
-        const prices = data.timeSeriesData[selectedStock].map(
-            (d: any) => d.price
-        );
-        const minPrice = Math.min(...prices);
-        const maxPrice = Math.max(...prices);
-        const range = maxPrice - minPrice;
 
-        // 5% buffer
-        const buffer = range * 0.05;
-
-        const bufferedMin = minPrice - buffer;
-        const bufferedMax = maxPrice + buffer;
-
-        const finalMin = bufferedMin < 0 ? 0 : bufferedMin;
-        const finalMax = bufferedMax;
-
-        return [finalMin, finalMax];
+    const handleModelSelected = (model: any) => {
+        setSelectedModel(model);
     };
 
     return (
@@ -124,14 +107,19 @@ export default function Home() {
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost">
                                 <div className="text-md font-semibold">
-                                    Model
+                                    {selectedModel || "Model"}
                                 </div>
                                 <ChevronDown />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
                             {data.models.map((model) => (
-                                <DropdownMenuItem key={model.id}>
+                                <DropdownMenuItem
+                                    key={model.id}
+                                    onClick={() =>
+                                        handleModelSelected(model.name)
+                                    }
+                                >
                                     {model.name}
                                 </DropdownMenuItem>
                             ))}
@@ -165,14 +153,17 @@ export default function Home() {
             </div>
             {selectedStock && (
                 <>
-                    <div className="lg:px-64  sm:px-16 p-4">
-                        <Card>
+                    <div className="flex justify-center md:px-12 sm:px-8 px-4">
+                        <Card className="w-full max-w-4xl">
                             <CardHeader>
                                 <CardTitle>{selectedStock}</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <ChartContainer config={chartConfig}>
-                                    <ResponsiveContainer>
+                                    <ResponsiveContainer
+                                        width="100%"
+                                        height={400}
+                                    >
                                         <AreaChart
                                             accessibilityLayer
                                             data={
@@ -181,9 +172,10 @@ export default function Home() {
                                                 ]
                                             }
                                             margin={{
-                                                left: 12,
-                                                right: 12,
-                                                bottom: 12,
+                                                top: 20,
+                                                bottom: 20,
+                                                left: 20,
+                                                right: 20,
                                             }}
                                         >
                                             <CartesianGrid vertical={false} />
@@ -192,13 +184,12 @@ export default function Home() {
                                                 tickLine={false}
                                                 axisLine={false}
                                                 tickMargin={2}
-                                                tick={{ dy: 10 }}
                                                 tickFormatter={(value) =>
                                                     format(
                                                         parseISO(value),
                                                         "MMM d"
                                                     )
-                                                } // "Jul 1"
+                                                }
                                             />
                                             <YAxis
                                                 dataKey="price"
@@ -208,9 +199,9 @@ export default function Home() {
                                                 orientation="right"
                                                 domain={[
                                                     (min: any) =>
-                                                        min - min * 0.05, // Add padding below the minimum
+                                                        min - min * 0.05,
                                                     (max: any) =>
-                                                        max + max * 0.05, // Add padding above the maximum
+                                                        max + max * 0.05,
                                                 ]}
                                                 scale="linear"
                                                 tickFormatter={(value) =>
@@ -260,15 +251,6 @@ export default function Home() {
                                     </ResponsiveContainer>
                                 </ChartContainer>
                             </CardContent>
-                            {/* <CardFooter className="flex-col items-start gap-2 text-sm">
-                                <div className="flex gap-2 font-medium leading-none">
-                                    Trending up by 5.2% this month{" "}
-                                    <TrendingUp className="h-4 w-4" />
-                                </div>
-                                <div className="leading-none text-muted-foreground">
-                                    Showing total visitors for the last 6 months
-                                </div>
-                            </CardFooter> */}
                         </Card>
                     </div>
                 </>
