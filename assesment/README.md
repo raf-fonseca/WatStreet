@@ -1,2 +1,0 @@
-# WatStreet
-Coding Assesment

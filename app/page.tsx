@@ -143,7 +143,11 @@ export default function Home() {
                                             tickMargin={8}
                                             orientation="right"
                                             domain={[
-                                                (min: any) => min - min * 0.05,
+                                                (min: any) =>
+                                                    Math.max(
+                                                        0,
+                                                        min - min * 0.05
+                                                    ), // Ensure the minimum value is at least 0
                                                 (max: any) => max + max * 0.05,
                                             ]}
                                             scale="linear"
