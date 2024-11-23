@@ -1,4 +1,3 @@
-// 2 dropdowns 1 model and another stocks. Based on what stock you pick, update the chart of prices.
 "use client";
 import { format, parseISO } from "date-fns";
 import { useState } from "react";
@@ -6,11 +5,8 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { TrendingUp } from "lucide-react";
 import {
     Area,
     AreaChart,
@@ -19,79 +15,26 @@ import {
     XAxis,
     YAxis,
 } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import {
-    ChartConfig,
     ChartContainer,
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart";
 
-const chartConfig = {
-    desktop: {
-        label: "Desktop",
-        color: "#c28b02",
-    },
-    mobile: {
-        label: "Mobile",
-        color: "hsl(var(--chart-2))",
-    },
-} satisfies ChartConfig;
-
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-
-const data = {
-    models: [
-        { id: 1, name: "Model A" },
-        { id: 2, name: "Model B" },
-        { id: 3, name: "Model C" },
-    ],
-    stocks: [
-        { symbol: "AAPL", name: "Apple Inc." },
-        { symbol: "GOOGL", name: "Alphabet Inc." },
-        { symbol: "MSFT", name: "Microsoft Corp." },
-    ],
-    timeSeriesData: {
-        AAPL: [
-            { date: "2024-07-01", price: 150 },
-            { date: "2024-07-02", price: 152 },
-            { date: "2024-07-03", price: 148 },
-            { date: "2024-07-04", price: 153 },
-        ],
-        GOOGL: [
-            { date: "2024-07-01", price: 2800 },
-            { date: "2024-07-02", price: 2820 },
-            { date: "2024-07-03", price: 2790 },
-            { date: "2024-07-04", price: 2830 },
-        ],
-        MSFT: [
-            { date: "2024-07-01", price: 300 },
-            { date: "2024-07-02", price: 305 },
-            { date: "2024-07-03", price: 302 },
-            { date: "2024-07-04", price: 310 },
-        ],
-    },
-};
+import { chartConfig, data } from "./constants";
 
 type StockSymbol = keyof typeof data.timeSeriesData; // StockSymbol is a type that can only be apart of timeSeriesData and has a data and price
 
 export default function Home() {
-    const [stockToggle, setStockToggle] = useState(false);
     const [selectedStock, setSelectedStock] = useState<StockSymbol | null>(
         "AAPL"
     );
-    const [modelToggle, setModelToggle] = useState(false);
-    const [selectedModel, setSelectedModel] = useState<string | null>(null); // State for selected model
+    const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
     const handleStockSelect = (symbol: any) => {
         setSelectedStock(symbol);
@@ -162,8 +105,6 @@ export default function Home() {
                     </DropdownMenu>
                 </div>
             </div>
-
-            {/* Chart Section */}
             {selectedStock && (
                 <div className="w-full max-w-4xl flex justify-center px-4">
                     <Card className="w-full">
