@@ -47,6 +47,8 @@ const chartConfig = {
 
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 const data = {
     models: [
@@ -100,9 +102,18 @@ export default function Home() {
     };
 
     return (
-        <div className="flex flex-col">
-            <div className="flex flex-row gap-3 justify-center py-6">
-                <div className="px-1 py-1 rounded-xl border-[1px] border-color-white ">
+        <div className="flex flex-col items-center">
+            <div className="w-full max-w-4xl flex justify-between items-center py-6 px-4">
+                <Link href="https://watstreet.netlify.app/">
+                    <Image
+                        src="/logo.jpeg"
+                        width={100}
+                        height={100}
+                        alt="Wat street logo"
+                        className="hover:cursor-pointer"
+                    />
+                </Link>
+                <div className="flex px-1 py-1 rounded-xl border-[1px] border-color-white ">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost">
@@ -137,12 +148,12 @@ export default function Home() {
                         <DropdownMenuContent>
                             {data.stocks.map((stock) => (
                                 <DropdownMenuItem
+                                    key={stock.symbol}
                                     onClick={() =>
                                         handleStockSelect(
                                             stock.symbol as StockSymbol
                                         )
                                     }
-                                    key={stock.symbol}
                                 >
                                     {stock.symbol}
                                 </DropdownMenuItem>
@@ -151,109 +162,97 @@ export default function Home() {
                     </DropdownMenu>
                 </div>
             </div>
+
+            {/* Chart Section */}
             {selectedStock && (
-                <>
-                    <div className="flex justify-center md:px-12 sm:px-8 px-4">
-                        <Card className="w-full max-w-4xl">
-                            <CardHeader>
-                                <CardTitle>{selectedStock}</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <ChartContainer config={chartConfig}>
-                                    <ResponsiveContainer
-                                        width="100%"
-                                        height={400}
+                <div className="w-full max-w-4xl flex justify-center px-4">
+                    <Card className="w-full">
+                        <CardHeader>
+                            <CardTitle>{selectedStock}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <ChartContainer config={chartConfig}>
+                                <ResponsiveContainer width="100%" height={400}>
+                                    <AreaChart
+                                        accessibilityLayer
+                                        data={
+                                            data.timeSeriesData[selectedStock]
+                                        }
+                                        margin={{
+                                            top: 20,
+                                            bottom: 20,
+                                            left: 20,
+                                            right: 20,
+                                        }}
                                     >
-                                        <AreaChart
-                                            accessibilityLayer
-                                            data={
-                                                data.timeSeriesData[
-                                                    selectedStock
-                                                ]
+                                        <CartesianGrid vertical={false} />
+                                        <XAxis
+                                            dataKey="date"
+                                            tickLine={false}
+                                            axisLine={false}
+                                            tickMargin={2}
+                                            tickFormatter={(value) =>
+                                                format(parseISO(value), "MMM d")
                                             }
-                                            margin={{
-                                                top: 20,
-                                                bottom: 20,
-                                                left: 20,
-                                                right: 20,
-                                            }}
-                                        >
-                                            <CartesianGrid vertical={false} />
-                                            <XAxis
-                                                dataKey="date"
-                                                tickLine={false}
-                                                axisLine={false}
-                                                tickMargin={2}
-                                                tickFormatter={(value) =>
-                                                    format(
-                                                        parseISO(value),
-                                                        "MMM d"
-                                                    )
-                                                }
-                                            />
-                                            <YAxis
-                                                dataKey="price"
-                                                tickLine={false}
-                                                axisLine={false}
-                                                tickMargin={8}
-                                                orientation="right"
-                                                domain={[
-                                                    (min: any) =>
-                                                        min - min * 0.05,
-                                                    (max: any) =>
-                                                        max + max * 0.05,
-                                                ]}
-                                                scale="linear"
-                                                tickFormatter={(value) =>
-                                                    selectedStock === "GOOGL"
-                                                        ? `$${(
-                                                              value / 1000
-                                                          ).toFixed(1)}k`
-                                                        : `$${value}`
-                                                }
-                                            />
-                                            <ChartTooltip
-                                                cursor={false}
-                                                content={
-                                                    <ChartTooltipContent />
-                                                }
-                                            />
-                                            <defs>
-                                                <linearGradient
-                                                    id="fillDesktop"
-                                                    x1="0"
-                                                    y1="0"
-                                                    x2="0"
-                                                    y2="0.5"
-                                                >
-                                                    <stop
-                                                        offset="0%"
-                                                        stopColor="var(--color-desktop)"
-                                                        stopOpacity={0.5}
-                                                    />
-                                                    <stop
-                                                        offset="10%"
-                                                        stopColor="var(--color-desktop)"
-                                                        stopOpacity={0.05}
-                                                    />
-                                                </linearGradient>
-                                            </defs>
-                                            <Area
-                                                dataKey="price"
-                                                type="natural"
-                                                fill="url(#fillDesktop)"
-                                                fillOpacity={0.6}
-                                                stroke="var(--color-desktop)"
-                                                strokeWidth={2}
-                                                stackId="a"
-                                            />
-                                        </AreaChart>
-                                    </ResponsiveContainer>
-                                </ChartContainer>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </>
+                                        />
+                                        <YAxis
+                                            dataKey="price"
+                                            tickLine={false}
+                                            axisLine={false}
+                                            tickMargin={8}
+                                            orientation="right"
+                                            domain={[
+                                                (min: any) => min - min * 0.05,
+                                                (max: any) => max + max * 0.05,
+                                            ]}
+                                            scale="linear"
+                                            tickFormatter={(value) =>
+                                                selectedStock === "GOOGL"
+                                                    ? `$${(
+                                                          value / 1000
+                                                      ).toFixed(1)}k`
+                                                    : `$${value}`
+                                            }
+                                        />
+                                        <ChartTooltip
+                                            cursor={false}
+                                            content={<ChartTooltipContent />}
+                                        />
+                                        <defs>
+                                            <linearGradient
+                                                id="fillDesktop"
+                                                x1="0"
+                                                y1="0"
+                                                x2="0"
+                                                y2="0.5"
+                                            >
+                                                <stop
+                                                    offset="0%"
+                                                    stopColor="var(--color-desktop)"
+                                                    stopOpacity={0.5}
+                                                />
+                                                <stop
+                                                    offset="10%"
+                                                    stopColor="var(--color-desktop)"
+                                                    stopOpacity={0.05}
+                                                />
+                                            </linearGradient>
+                                        </defs>
+                                        <Area
+                                            dataKey="price"
+                                            type="natural"
+                                            fill="url(#fillDesktop)"
+                                            fillOpacity={0.6}
+                                            stroke="var(--color-desktop)"
+                                            strokeWidth={2}
+                                            stackId="a"
+                                        />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            </ChartContainer>
+                        </CardContent>
+                    </Card>
+                </div>
             )}
         </div>
     );
